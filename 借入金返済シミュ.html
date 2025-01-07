@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ローン返済シミュレーター</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .input-group {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .input-group label {
+      width: 150px;
+      margin-right: 10px;
+    }
+    .input-group input, .input-group select {
+      padding: 5px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 120px;
+      text-align: right;
+    }
+    .unit {
+      margin-left: 5px;
+      font-size: 14px;
+    }
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      font-size: 16px;
+      color: #fff;
+      background-color: #4CAF50;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.3s;
+    }
+    .button:hover {
+      background-color: #45a049;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #f9f9f9;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">ローン返済シミュレーター</div>
+    <div class="input-group">
+      <label for="principal">元金:</label>
+      <input type="text" id="principal" placeholder="例: 7,000,000">
+      <span class="unit">円</span>
+    </div>
+    <div class="input-group">
+      <label for="startDate">借入日:</label>
+      <select id="year"></select>
+      <select id="month"></select>
+      <select id="day"></select>
+    </div>
+    <div class="input-group">
+      <label for="interestRate">利率:</label>
+      <input type="number" id="interestRate" placeholder="例: 2">
+      <span class="unit">%</span>
+    </div>
+    <div class="input-group">
+      <label for="years">返済期間:</label>
+      <input type="number" id="years" placeholder="例: 10">
+      <span class="unit">年</span>
+    </div>
+    <div class="input-group">
+      <label for="roundingOption">元本返済額:</label>
+      <select id="roundingOption">
+        <option value="none">そのまま</option>
+        <option value="ceil">切り上げ（1,000円単位）</option>
+        <option value="floor">切り捨て（1,000円単位）</option>
+        <option value="round">四捨五入（1,000円単位）</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label for="interestOption">利息計算方法:</label>
+      <select id="interestOption">
+        <option value="round">四捨五入</option>
+        <option value="ceil">切り上げ</option>
+        <option value="floor">切り捨て</option>
+      </select>
+    </div>
+    <div style="text-align: center;">
+      <button class="button" onclick="calculateLoan()">計算</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>年月</th>
+          <th>月首残高</th>
+          <th>元本返済額</th>
+          <th>利息返済額</th>
+          <th>月末残高</th>
+        </tr>
+      </thead>
+      <tbody id="resultTable">
+        <!-- 結果がここに挿入されます -->
+      </tbody>
+    </table>
+  </div>
+  <script>
+    function populateDateSelectors() {
+      const yearSelect = document.getElementById('year');
+      const monthSelect = document.getElementById('month');
+      const daySelect = document.getElementById('day');
+      const today = new Date();
+
+      // 年の範囲を2010年から2030年に設定
+      for (let year = 2010; year <= 2030; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if (year === today.getFullYear()) option.selected = true;
+        yearSelect.appendChild(option);
+      }
+
+      // 月の範囲を1月から12月に設定
+      for (let month = 1; month <= 12; month++) {
+        const option = document.createElement('option');
+        option.value = month;
+        option.textContent = month;
+        if (month === today.getMonth() + 1) option.selected = true;
+        monthSelect.appendChild(option);
+      }
+
+      // 日の範囲を1日から31日に設定
+      for (let day = 1; day <= 31; day++) {
+        const option = document.createElement('option');
+        option.value = day;
+        option.textContent = day;
+        if (day === today.getDate()) option.selected = true;
+        daySelect.appendChild(option);
+      }
+    }
+
+    populateDateSelectors();
+
+    document.getElementById('principal').addEventListener('input', function () {
+      let value = this.value.replace(/,/g, '');
+      if (!isNaN(value) && value !== '') {
+        this.value = parseInt(value, 10).toLocaleString();
+      } else {
+        this.value = '';
+      }
+    });
+
+    function calculateLoan() {
+      const principal = parseInt(document.getElementById('principal').value.replace(/,/g, ''), 10);
+      const year = parseInt(document.getElementById('year').value, 10);
+      const month = parseInt(document.getElementById('month').value, 10) - 1;
+      const day = parseInt(document.getElementById('day').value, 10);
+      const interestRate = parseFloat(document.getElementById('interestRate').value) / 100;
+      const years = parseInt(document.getElementById('years').value, 10);
+      const roundingOption = document.getElementById('roundingOption').value;
+      const interestOption = document.getElementById('interestOption').value;
+
+      if (!principal || !year || month < 0 || day < 1 || !interestRate || !years) {
+        alert('すべての入力を正しく入力してください');
+        return;
+      }
+
+      const startDate = new Date(year, month, day);
+      const months = years * 12;
+      const baseMonthlyPrincipal = Math.floor(principal / months);
+      let balance = principal;
+      const resultTable = document.getElementById('resultTable');
+      resultTable.innerHTML = '';
+
+      for (let i = 0; i < months; i++) {
+        const monthStart = new Date(startDate);
+        monthStart.setMonth(startDate.getMonth() + i);
+
+        const daysInMonth = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0).getDate();
+
+        let monthlyPrincipal = baseMonthlyPrincipal;
+        if (roundingOption === "ceil") {
+          monthlyPrincipal = Math.ceil(monthlyPrincipal / 1000) * 1000;
+        } else if (roundingOption === "floor") {
+          monthlyPrincipal = Math.floor(monthlyPrincipal / 1000) * 1000;
+        } else if (roundingOption === "round") {
+          monthlyPrincipal = Math.round(monthlyPrincipal / 1000) * 1000;
+        }
+
+        const monthEndBalance = balance - monthlyPrincipal;
+        let interest = monthEndBalance * (interestRate / 365) * daysInMonth;
+
+        if (interestOption === "ceil") {
+          interest = Math.ceil(interest);
+        } else if (interestOption === "floor") {
+          interest = Math.floor(interest);
+        } else {
+          interest = Math.round(interest);
+        }
+
+        const row = `
+          <tr>
+            <td>${monthStart.getFullYear()}年${monthStart.getMonth() + 1}月</td>
+            <td>${balance.toLocaleString()}</td>
+            <td>${monthlyPrincipal.toLocaleString()}</td>
+            <td>${interest.toLocaleString()}</td>
+            <td>${monthEndBalance.toLocaleString()}</td>
+          </tr>
+        `;
+
+        resultTable.insertAdjacentHTML('beforeend', row);
+        balance = monthEndBalance;
+      }
+    }
+  </script>
+</body>
+</html>

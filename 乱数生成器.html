@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>乱数生成ツール</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .range-inputs {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .range-inputs input {
+      width: 80px;
+      padding: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .range-inputs label {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .button-group {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .button-group button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .button-group button:hover {
+      background-color: #45a049;
+    }
+    .result-display {
+      text-align: center;
+      margin: 20px 0;
+      padding: 20px;
+      font-size: 48px;
+      font-weight: bold;
+      color: #4CAF50;
+      background-color: #f0f0f0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .history {
+      font-size: 16px;
+    }
+    .history ul {
+      list-style: none;
+      padding: 0;
+    }
+    .history ul li {
+      padding: 5px 0;
+      border-bottom: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">乱数生成ツール</div>
+    <div class="range-inputs">
+      <label for="min">最小:</label>
+      <input type="number" id="min" value="1">
+      <label for="max">最大:</label>
+      <input type="number" id="max" value="40">
+    </div>
+    <div class="button-group">
+      <button id="generateButton">乱数を生成</button>
+    </div>
+    <div id="resultDisplay" class="result-display">---</div>
+    <div class="history">
+      <h3>生成履歴:</h3>
+      <ul id="historyList"></ul>
+    </div>
+  </div>
+
+  <script>
+    const generateButton = document.getElementById('generateButton');
+    const resultDisplay = document.getElementById('resultDisplay');
+    const historyList = document.getElementById('historyList');
+
+    generateButton.addEventListener('click', () => {
+      const min = parseInt(document.getElementById('min').value, 10);
+      const max = parseInt(document.getElementById('max').value, 10);
+
+      if (isNaN(min) || isNaN(max) || min >= max) {
+        alert('最小値は最大値より小さい必要があります。');
+        return;
+      }
+
+      const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+
+      // 最新の結果を表示
+      resultDisplay.textContent = randomNumber;
+
+      // 履歴に追加
+      const listItem = document.createElement('li');
+      listItem.textContent = `乱数: ${randomNumber}`;
+      historyList.appendChild(listItem);
+    });
+  </script>
+</body>
+</html>

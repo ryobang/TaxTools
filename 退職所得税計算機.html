@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>退職金計算ツール</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .title {
+      font-size: 28px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .input-group {
+      margin-bottom: 20px;
+    }
+    .input-group label {
+      font-size: 18px;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .dropdown-group, .input-box-group {
+      display: flex;
+      gap: 5px;
+    }
+    .dropdown-group select, .input-box-group input {
+      padding: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 80px;
+    }
+    .input-box-group span {
+      align-self: center;
+      font-size: 16px;
+    }
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .button-group {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .button-group button {
+      padding: 12px 24px;
+      font-size: 18px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .button-group button:hover {
+      background-color: #45a049;
+    }
+    .result-display {
+      margin-top: 20px;
+      padding: 20px;
+      font-size: 18px;
+      background-color: #fff;
+      border: 1px solid #000;
+      border-radius: 4px;
+      line-height: 1.8;
+    }
+    .red-text {
+      color: red !important;
+      font-weight: bold !important;
+    }
+    .small-text {
+      font-size: 14px;
+      color: #555;
+    }
+    hr {
+      margin: 20px 0;
+      border: none;
+      border-top: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">退職金計算ツール</div>
+    <div class="input-group">
+      <label>入社年月日:</label>
+      <div class="dropdown-group">
+        <select id="startYear"></select>
+        <select id="startMonth"></select>
+        <select id="startDay"></select>
+      </div>
+    </div>
+    <div class="input-group">
+      <label>退職年月日:</label>
+      <div class="dropdown-group">
+        <select id="endYear"></select>
+        <select id="endMonth"></select>
+        <select id="endDay"></select>
+      </div>
+    </div>
+    <div class="input-group">
+      <label>退職金の額（万円）:</label>
+      <div class="input-box-group">
+        <input type="text" id="retirementPay" placeholder="金額を入力">
+        <span>万円</span>
+      </div>
+    </div>
+    <div class="checkbox-group">
+      <input type="checkbox" id="executiveCheck">
+      <label for="executiveCheck">役員報酬</label>
+    </div>
+    <div class="button-group">
+      <button id="calculateButton">計算</button>
+    </div>
+    <div id="resultDisplay" class="result-display">
+      <p><span>勤続年数:</span> - 年（- 年 - ヶ月、1年未満切り上げ）</p>
+      <p>
+        <span>退職手当等の区分:</span>
+        <span id="retirementType">-</span>
+        <br>
+        <span class="small-text" id="retirementDescription">-</span>
+      </p>
+      <p><span>入力した退職金額:</span> - 円</p>
+      <p><span>退職金控除額:</span> - 円</p>
+      <p><span>控除後所得額（課税対象）:</span> - 円</p>
+      <p>
+        <span>源泉徴収額:</span> - 円
+        <span class="small-text" id="noDeclaration">（届け出なしの場合：- 円）</span>
+      </p>
+      <hr>
+      <p><span>源泉徴収後所得金額:</span> - 円</p>
+    </div>
+  </div>
+
+<script>
+  function populateDropdown(id, start, end, selected) {
+    const dropdown = document.getElementById(id);
+    for (let i = start; i <= end; i++) {
+      const option = document.createElement('option');
+      option.value = i;
+      option.textContent = i;
+      if (i === selected) option.selected = true;
+      dropdown.appendChild(option);
+    }
+  }
+
+  function calculateDateDifference(start, end) {
+    const diff = new Date(end - start);
+    const years = diff.getUTCFullYear() - 1970;
+    const months = diff.getUTCMonth();
+    return { years: years + (months > 0 ? 1 : 0), months };
+  }
+
+  function getRetirementType(isExecutive, years) {
+    if (isExecutive && years <= 5) return "特定役員退職手当等";
+    if (!isExecutive && years <= 5) return "短期退職手当等";
+    return "一般退職手当等";
+  }
+
+  function getRetirementDescription(type) {
+    if (type === "短期退職手当等") return "役員以外で勤続年数5年以下の場合；課税所得300万円超だと特殊計算";
+    if (type === "特定役員退職手当等") return "役員かつ勤続年数5年以下の場合；課税所得に×1/2計算なし";
+    return "課税所得に1/2計算";
+  }
+
+  function calculateTaxableIncome(type, grossIncome, deduction) {
+    if (type === "一般退職手当等") {
+      return Math.max((grossIncome - deduction) / 2, 0);
+    }
+    if (type === "特定役員退職手当等") {
+      return Math.max(grossIncome - deduction, 0);
+    }
+    if (type === "短期退職手当等") {
+      const taxable = grossIncome - deduction;
+      return taxable > 3000000
+        ? taxable - 1500000
+        : Math.max(taxable / 2, 0);
+    }
+    return 0;
+  }
+
+  function calculateWithholdingTax(taxableIncome) {
+    const taxTable = [
+      { limit: 1950000, rate: 0.05, deduction: 0 },
+      { limit: 3300000, rate: 0.10, deduction: 97500 },
+      { limit: 6950000, rate: 0.20, deduction: 427500 },
+      { limit: 9000000, rate: 0.23, deduction: 636000 },
+      { limit: 18000000, rate: 0.33, deduction: 1536000 },
+      { limit: 40000000, rate: 0.40, deduction: 4796000 },
+      { limit: Infinity, rate: 0.45, deduction: 4796000 },
+    ];
+
+    for (const bracket of taxTable) {
+      if (taxableIncome <= bracket.limit) {
+        return Math.floor((taxableIncome * bracket.rate - bracket.deduction) * 1.021);
+      }
+    }
+    return 0;
+  }
+
+  document.getElementById('calculateButton').addEventListener('click', () => {
+    const startYear = parseInt(document.getElementById('startYear').value, 10);
+    const startMonth = parseInt(document.getElementById('startMonth').value, 10);
+    const startDay = parseInt(document.getElementById('startDay').value, 10);
+    const endYear = parseInt(document.getElementById('endYear').value, 10);
+    const endMonth = parseInt(document.getElementById('endMonth').value, 10);
+    const endDay = parseInt(document.getElementById('endDay').value, 10);
+
+    const startDate = new Date(startYear, startMonth - 1, startDay);
+    const endDate = new Date(endYear, endMonth - 1, endDay);
+
+    const { years, months } = calculateDateDifference(startDate, endDate);
+
+    const retirementPay = parseInt(document.getElementById('retirementPay').value.replace(/,/g, ''), 10) * 10000 || 0;
+    const isExecutive = document.getElementById('executiveCheck').checked;
+
+    const type = getRetirementType(isExecutive, years);
+    const description = getRetirementDescription(type);
+    const deduction = years <= 20 ? 400000 * years : 8000000 + 700000 * (years - 20);
+    const taxableIncome = calculateTaxableIncome(type, retirementPay, deduction);
+    const withholdingTax = calculateWithholdingTax(taxableIncome);
+    const noDeclarationTax = Math.floor(taxableIncome * 0.2042);
+    const afterTaxIncome = retirementPay - withholdingTax;
+
+    const typeClass = type === "短期退職手当等" || type === "特定役員退職手当等" ? 'red-text' : '';
+
+    const resultDisplay = document.getElementById('resultDisplay');
+    if (resultDisplay) {
+      resultDisplay.innerHTML = `
+        <p><span>勤続年数:</span> ${years} 年（${years - 1} 年 ${months} ヶ月、1年未満切り上げ）</p>
+        <p>
+          <span>退職手当等の区分:</span>
+          <span class="${typeClass}">${type}</span>
+          <br>
+          <span class="small-text">${description}</span>
+        </p>
+        <p><span>入力した退職金額:</span> ${retirementPay.toLocaleString()} 円</p>
+        <p><span>退職金控除額:</span> ${deduction.toLocaleString()} 円</p>
+        <p><span>控除後所得額（課税対象）:</span> ${taxableIncome.toLocaleString()} 円</p>
+        <p>
+          <span>源泉徴収額:</span> ${withholdingTax.toLocaleString()} 円
+          <span class="small-text">（届け出なしの場合：${noDeclarationTax.toLocaleString()} 円）</span>
+        </p>
+        <hr>
+        <p><span>源泉徴収後所得金額:</span> ${afterTaxIncome.toLocaleString()} 円</p>
+      `;
+    }
+  });
+
+  const currentYear = new Date().getFullYear();
+  populateDropdown('startYear', 1950, currentYear, 2000);
+  populateDropdown('endYear', 1950, currentYear, currentYear);
+  populateDropdown('startMonth', 1, 12, 1);
+  populateDropdown('endMonth', 1, 12, new Date().getMonth() + 1);
+  populateDropdown('startDay', 1, 31, 1);
+  populateDropdown('endDay', 1, 31, new Date().getDate());
+
+  document.getElementById('retirementPay').addEventListener('input', function (e) {
+    const value = e.target.value.replace(/,/g, '');
+    if (!isNaN(value)) {
+      e.target.value = Number(value).toLocaleString();
+    }
+  });
+</script>
+
+</body>
+</html>
