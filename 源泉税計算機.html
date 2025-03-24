@@ -99,7 +99,7 @@
       <span>円</span>
     </div>
     <div class="button-group">
-      <button id="calculateButton">計算</button>
+      <!-- この行を削除 -->
     </div>
     <div id="resultDisplay" class="result-display">
       <table class="result-table">
@@ -132,11 +132,12 @@
   </div>
 
   <script>
-    const calculateButton = document.getElementById('calculateButton');
+    // const calculateButton = document.getElementById('calculateButton'); // この行を削除
     const resultTableBody = document.getElementById('resultTableBody');
+    const netIncomeInput = document.getElementById('netIncome');
 
-    calculateButton.addEventListener('click', () => {
-      const netIncome = parseInt(document.getElementById('netIncome').value, 10);
+    const calculate = () => {
+      const netIncome = parseInt(netIncomeInput.value, 10);
 
       if (!netIncome || netIncome <= 0) {
         // 入力が空または0以下の場合は何もせず終了
@@ -166,7 +167,15 @@
           <td>${grossInterest.toLocaleString()} 円</td>
         </tr>
       `;
+    };
+
+    // calculateButton.addEventListener('click', calculate); // この行を削除
+    netIncomeInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        calculate();
+      }
     });
+    netIncomeInput.addEventListener('input', calculate);
   </script>
 </body>
 </html>
