@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>配当金源泉税計算ツール</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .input-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .input-group label {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .income-input {
+      width: 120px;
+      padding: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .tax-rate-select {
+      width: 200px;
+      padding: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .button-group {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .button-group button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .button-group button:hover {
+      background-color: #45a049;
+    }
+    .result-display {
+      margin-top: 20px;
+      padding: 20px;
+      font-size: 16px;
+      background-color: #f0f0f0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    .result-table th,
+    .result-table td {
+      border: 1px solid #ddd;
+      text-align: center;
+      padding: 8px;
+    }
+    .result-table th {
+      background-color: #28a745; /* Bootstrapの緑色 */
+      font-weight: bold;
+    }
+    .highlight {
+      background-color: #fffbe6; /* 淡い黄色 */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">配当金源泉税計算ツール</div>
+    <div class="input-group">
+      <label for="netIncome">受取金額:</label>
+      <input type="number" id="netIncome" class="income-input" placeholder="" min="0">
+      <span>円</span>
+    </div>
+    <div class="input-group">
+      <label for="taxRate">税率選択:</label>
+      <select id="taxRate" class="tax-rate-select">
+        <option value="15.315">未上場株 (15.315%)</option>
+        <option value="20.315">上場株 (持分割合3%未満) (20.315%)</option>
+        <option value="15.315">上場株 (持分割合3%以上) (15.315%)</option>
+      </select>
+    </div>
+    <div class="button-group">
+      <!-- この行を削除 -->
+    </div>
+    <div id="resultDisplay" class="result-display">
+      <table class="result-table">
+        <thead>
+          <tr>
+            <th>勘定科目</th>
+            <th>借方</th>
+            <th>貸方</th>
+          </tr>
+        </thead>
+        <tbody id="resultTableBody">
+          <tr class="highlight">
+            <td>現預金</td>
+            <td>---</td>
+            <td>---</td>
+          </tr>
+          <tr class="highlight">
+            <td>租税公課</td>
+            <td>---</td>
+            <td>---</td>
+          </tr>
+          <tr class="highlight">
+            <td>受取配当金</td>
+            <td></td>
+            <td>---</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // const calculateButton = document.getElementById('calculateButton'); // この行を削除
+    const resultTableBody = document.getElementById('resultTableBody');
+    const netIncomeInput = document.getElementById('netIncome');
+    const taxRateSelect = document.getElementById('taxRate');
+
+    const calculate = () => {
+      const netIncome = parseInt(netIncomeInput.value, 10);
+      const taxRate = parseFloat(taxRateSelect.value) / 100;
+
+      if (!netIncome || netIncome <= 0) {
+        // 入力が空または0以下の場合は何もせず終了
+        return;
+      }
+
+      // 税引前配当金を計算
+      const grossDividend = Math.floor(netIncome / (1 - taxRate));
+      // 源泉税を計算
+      const withholdingTax = grossDividend - netIncome;
+
+      // 結果を表に表示
+      resultTableBody.innerHTML = `
+        <tr class="highlight">
+          <td>現預金</td>
+          <td>${netIncome.toLocaleString()} 円</td>
+          <td></td>
+        </tr>
+        <tr class="highlight">
+          <td>租税公課</td>
+          <td>${withholdingTax.toLocaleString()} 円</td>
+          <td></td>
+        </tr>
+        <tr class="highlight">
+          <td>受取利息</td>
+          <td></td>
+          <td>${grossDividend.toLocaleString()} 円</td>
+        </tr>
+      `;
+    };
+
+    // calculateButton.addEventListener('click', calculate); // この行を削除
+    netIncomeInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        calculate();
+      }
+    });
+    netIncomeInput.addEventListener('input', calculate);
+    taxRateSelect.addEventListener('change', calculate);
+  </script>
+</body>
+</html>
