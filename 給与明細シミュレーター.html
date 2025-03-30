@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>給与明細シミュレーター</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <script src="data/源泉税計算.js"></script>
+  <script src="data/保険料計算.js"></script>
+  <style>
+    @media (max-width: 768px) {
+      .container {
+        max-width: 90%; /* スマホなどの小さい画面では90%に設定 */
+      }
+    }
+    @media (min-width: 769px) {
+      .container {
+        max-width: 70%; /* 大きい画面では70%に設定 */
+      }
+    }
+    .fixed-width {
+      max-width: 1100px; /* 固定幅を設定（必要に応じて調整） */
+      margin: 0 auto; /* 中央揃え */
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container-fluid py-5 fixed-width">
+    <h1 class="text-center mb-4">給与明細シミュレーター</h1>
+    <div class="card shadow">
+      <div class="card-body">
+        <div class="aaa" style="display: flex; flex-direction: row; gap: 10px;">
+            <div class="mb-3" style="max-width: 120px;">
+            <label for="dependents" class="form-label">扶養人数:</label>
+            <div class="input-group">
+                <input type="number" id="dependents" class="form-control" min="0" value="0" style="max-width: 60px;" />
+                <span class="input-group-text">人</span>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" id="乙欄" class="form-check-input" onchange="toggleDependents()" />
+                <label for="乙欄" class="form-check-label">乙欄</label>
+            </div>
+            </div>
+            <div class="mb-3" style="max-width: 120px;">
+            <label for="overtimeHours" class="form-label">残業時間:</label>
+            <div class="input-group">
+                <input type="number" id="overtimeHours" class="form-control" min="0" value="0" oninput="updateOvertimePay()" />
+                <span class="input-group-text">時間</span>
+            </div>
+            </div>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" id="nursingInsurance" class="form-check-input" />
+          <label for="nursingInsurance" class="form-check-label">介護保険加入</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" id="employmentInsurance" class="form-check-input" checked />
+          <label for="employmentInsurance" class="form-check-label">雇用保険加入</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" id="nonTaxable" class="form-check-input" />
+          <label for="nonTaxable" class="form-check-label">住民税非課税</label>
+        </div>
+        <hr />
+        <table class="table table-bordered text-center align-middle">
+          <thead class="table-success">
+            <tr>
+              <th>基本給</th>
+              <th>非課税通勤手当</th>
+              <th>時間外手当</th>
+              <th></th>
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="input-group">
+                  <input type="text" id="baseSalary" class="form-control" placeholder="" oninput="formatNumber(this); calculateAll()" />
+                  <span class="input-group-text">円</span>
+                </div>
+              </td>
+              <td>
+                <div class="input-group">
+                  <input type="text" id="nonTaxableAllowance" class="form-control" placeholder="" oninput="calculateAll()" />
+                  <span class="input-group-text">円</span>
+                </div>
+              </td>
+              <td>
+                <div class="input-group">
+                  <input type="text" id="overtimePay" class="form-control" placeholder="" oninput="updateOvertimePay(); calculateAll()" />
+                  <span class="input-group-text">円</span>
+                </div>
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tbody>
+          <thead class="table-success">
+            <tr>
+              <th>源泉所得税</th>
+              <th>住民税</th>
+              <th>健康保険料</th>
+              <th>介護保険料</th>
+              <th>厚生年金</th>
+              <th>雇用保険料</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="input-group">
+                  <input type="text" id="withholdingTax" class="form-control" placeholder="" disabled />
+                  <span class="input-group-text">円</span>
+                </div>
+              </td>
+              <td>
+                <div class="input-group">
+                  <input type="text" id="residentTax" class="form-control" placeholder="" disabled />
+                  <span class="input-group-text">円</span>
+                </div>
+              </td>
+              <td>
+                <div class="input-group">
+                  <input type="text" id="healthInsuranceFee" class="form-control" placeholder="" disabled />
+                  <span class="input-group-text">円</span>
+                </div>
+              </td>
+              <td>
+                <div class="input-group">
+                  <input type="text" id="nursingCareFee" class="form-control" placeholder="" disabled />
+                  <span class="input-group-text">円</span>
+                </div>
+              </td>
+              <td>
+                <div class="input-group">
+                  <input type="text" id="pensionFee" class="form-control" placeholder="" disabled />
+                  <span class="input-group-text">円</span>
+                </div>
+              </td>
+              <td>
+                <div class="input-group">
+                  <input type="text" id="employmentInsuranceFee" class="form-control" placeholder="" disabled />
+                  <span class="input-group-text">円</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+          <thead class="table-success">
+            <tr>
+              <th></th>
+              <th></th>
+              <th></th>
+              <th></th>
+              <th></th>
+              <th>差引支給額</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>
+                <div class="input-group">
+                  <input type="text" id="netPay" class="form-control" placeholder="" disabled />
+                  <span class="input-group-text">円</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script>
+    function formatNumber(input) {
+      // 数値を取得
+      let value = input.value.replace(/,/g, ''); // 既存のカンマを削除
+      // 数値に変換
+      if (!isNaN(value) && value !== '') {
+        input.value = Number(value).toLocaleString(); // カンマ区切りに変換
+      } else {
+        input.value = ''; // 無効な入力の場合は空にする
+      }
+    }
+
+    // 扶養人数の入力を制御する関数
+    function toggleDependents() {
+      const dependentsInput = document.querySelector('#dependents');
+      const isChecked = document.querySelector('#乙欄').checked;
+
+      if (isChecked) {
+        dependentsInput.value = -1; // 扶養人数を-1に
+        dependentsInput.disabled = true; // 入力不可にする
+      } else {
+        dependentsInput.value = 0; // 扶養人数を0に戻す
+        dependentsInput.disabled = false; // 入力可能にする
+      }
+    }
+
+    // 残業時間に基づいて時間外手当を計算する関数
+    function updateOvertimePay() {
+      const baseSalary = parseInt(document.querySelector('#baseSalary').value.replace(/,/g, '')) || 0; // 基本給
+      const overtimeHours = parseInt(document.querySelector('#overtimeHours').value) || 0; // 残業時間
+      const overtimePay = Math.floor((baseSalary / 160) * 1.25 * overtimeHours); // 時間外手当の計算（小数点以下切り捨て）
+
+      document.querySelector('#overtimePay').value = Math.max(0, overtimePay).toLocaleString(); // 時間外手当の欄に表示
+      calculateAll(); // 残業時間が変更されたら計算を実行
+    }
+
+    // 全ての計算を行う関数
+    function calculateAll() {
+      calculateInsurance(); // 保険料を計算
+      updateWithholdingTax(); // 源泉所得税を計算
+      calculateNetPay(); // 差引支給額を計算
+    }
+
+    // 基本給と時間外手当を取得し、源泉所得税を更新する関数
+    function updateWithholdingTax() {
+      const baseSalary = parseInt(document.querySelector('#baseSalary').value.replace(/,/g, '')) || 0; // 基本給
+      const overtimePay = parseInt(document.querySelector('#overtimePay').value.replace(/,/g, '')) || 0; // 時間外手当
+      const healthInsuranceFee = parseInt(document.querySelector('#healthInsuranceFee').value.replace(/,/g, '')) || 0; // 健康保険料
+      const nursingCareFee = parseInt(document.querySelector('#nursingCareFee').value.replace(/,/g, '')) || 0; // 介護保険料
+      const pensionFee = parseInt(document.querySelector('#pensionFee').value.replace(/,/g, '')) || 0; // 厚生年金
+      const employmentInsuranceFee = parseInt(document.querySelector('#employmentInsuranceFee').value.replace(/,/g, '')) || 0; // 雇用保険料
+
+      // Bの計算
+      const B = baseSalary + overtimePay - healthInsuranceFee - nursingCareFee - pensionFee - employmentInsuranceFee;
+
+      // 基礎控除額の計算
+      const C = (baseSalary + overtimePay) * 12; // Cの計算
+      let basicDeduction = 0;
+
+      if (C <= 1625000) {
+        basicDeduction = 550000;
+      } else if (C <= 1800000) {
+        basicDeduction = Math.floor(C * 0.4 - 100000);
+      } else if (C <= 3600000) {
+        basicDeduction = Math.floor(C * 0.3 + 80000);
+      } else if (C <= 6600000) {
+        basicDeduction = Math.floor(C * 0.2 + 440000);
+      } else if (C <= 8500000) {
+        basicDeduction = Math.floor(C * 0.1 + 1100000);
+      } else {
+        basicDeduction = 1950000; // 上限
+      }
+
+      // 住民税の計算
+      const residentTax = Math.floor(((B - (430000 + basicDeduction) / 12) * 0.1) / 100) * 100; // 住民税を計算
+
+      // 源泉税を計算（ライブラリの「源泉税計算」関数を使用）
+      const withholdingTax = 源泉税計算(B, parseInt(document.querySelector('#dependents').value, 10)); // Bを使用
+
+      // 源泉所得税の欄に入力
+      if (withholdingTax !== undefined) {
+        document.querySelector('#withholdingTax').value = withholdingTax.toLocaleString(); // 源泉所得税の欄に表示
+      } else {
+        document.querySelector('#withholdingTax').value = '計算エラー'; // エラー処理
+      }
+
+      // 住民税の欄に入力
+      document.querySelector('#residentTax').value = residentTax.toLocaleString(); // 住民税の欄に表示
+    }
+
+    // 保険料を計算する関数
+    function calculateInsurance() {
+      const baseSalary = parseInt(document.querySelector('#baseSalary').value.replace(/,/g, '')) || 0; // 基本給
+      const nonTaxableAllowance = parseInt(document.querySelector('#nonTaxableAllowance').value.replace(/,/g, '')) || 0; // 非課税通勤手当
+      const overtimePay = parseInt(document.querySelector('#overtimePay').value.replace(/,/g, '')) || 0; // 時間外手当
+      const A = baseSalary + nonTaxableAllowance + overtimePay; // Aの計算
+
+      // 健康保険料の計算
+      const healthInsuranceRate = 健康保険料等級計算(A); // 健康保険料等級計算を実行
+      const healthInsuranceFee = Math.floor(healthInsuranceRate * 0.0991 / 2); // 健康保険料の計算
+      document.querySelector('#healthInsuranceFee').value = healthInsuranceFee.toLocaleString(); // 健康保険料の欄に表示
+
+      // 介護保険料の計算
+      const nursingInsuranceChecked = document.querySelector('#nursingInsurance').checked;
+      if (nursingInsuranceChecked) {
+        const nursingCareFee = Math.floor(healthInsuranceRate * 0.0159 / 2); // 介護保険料の計算
+        document.querySelector('#nursingCareFee').value = nursingCareFee.toLocaleString(); // 介護保険料の欄に表示
+      } else {
+        document.querySelector('#nursingCareFee').value = '---'; // 介護保険料の欄を空にする
+      }
+
+      // 厚生年金の計算
+      const pensionRate = 厚生年金等級計算(A); // 厚生年金等級計算を実行
+      const pensionFee = Math.floor(pensionRate * 0.183 / 2); // 厚生年金の計算
+      document.querySelector('#pensionFee').value = pensionFee.toLocaleString(); // 厚生年金の欄に表示
+
+      // 雇用保険料の計算
+      const employmentInsuranceFee = Math.floor(A * 0.006); // 雇用保険料の計算
+      document.querySelector('#employmentInsuranceFee').value = employmentInsuranceFee.toLocaleString(); // 雇用保険料の欄に表示
+    }
+
+    // 差引支給額を計算する関数
+    function calculateNetPay() {
+      const baseSalary = parseInt(document.querySelector('#baseSalary').value.replace(/,/g, '')) || 0; // 基本給
+      const overtimePay = parseInt(document.querySelector('#overtimePay').value.replace(/,/g, '')) || 0; // 時間外手当
+      const withholdingTax = parseInt(document.querySelector('#withholdingTax').value.replace(/,/g, '')) || 0; // 源泉所得税
+      const residentTax = parseInt(document.querySelector('#residentTax').value.replace(/,/g, '')) || 0; // 住民税
+      const healthInsuranceFee = parseInt(document.querySelector('#healthInsuranceFee').value.replace(/,/g, '')) || 0; // 健康保険料
+      const nursingCareFee = parseInt(document.querySelector('#nursingCareFee').value.replace(/,/g, '')) || 0; // 介護保険料
+      const pensionFee = parseInt(document.querySelector('#pensionFee').value.replace(/,/g, '')) || 0; // 厚生年金
+      const employmentInsuranceFee = parseInt(document.querySelector('#employmentInsuranceFee').value.replace(/,/g, '')) || 0; // 雇用保険料
+
+      // 差引支給額の計算
+      const netPay = baseSalary + overtimePay - withholdingTax - residentTax - healthInsuranceFee - nursingCareFee - pensionFee - employmentInsuranceFee;
+
+      // 差引支給額の欄に入力
+      document.querySelector('#netPay').value = netPay.toLocaleString(); // 差引支給額の欄に表示
+    }
+  </script>
+</body>
+</html>
