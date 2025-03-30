@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>十徳ナイフ系サイト</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .card {
+            margin-bottom: 20px; /* カードの下にマージンを追加 */
+        }
+        .genre {
+            display: none; /* 初期状態では非表示 */
+        }
+        .card-title {
+            font-size: 1.5rem; /* タイトルを大きく */
+            font-weight: bold; /* タイトルを太字に */
+        }
+        .card-text {
+            font-size: 0.9rem; /* 説明書きを小さく */
+        }
+    </style>
+</head>
+<body onload="showAll()">
+    <div class="container mt-5">
+        <h1 class="text-center">十徳ナイフ系サイト</h1>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="showAll()">すべて</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="showGenre('recording')">記帳</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="showGenre('incomeTax')">所得税</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="showGenre('corporate')">法人</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="showGenre('others')">その他</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <div id="recording" class="genre mt-4">
+            <h2>記帳</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">預金源泉税計算機</h5>
+                            <p class="card-text">預金利息から源泉税を逆算する</p>
+                            <a href="源泉税計算機.html" class="btn btn-primary">開く</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">配当金源泉税計算機</h5>
+                            <p class="card-text">配当金入金額から源泉税を逆算する</p>
+                            <a href="配当金源泉税計算機.html" class="btn btn-primary">開く</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="incomeTax" class="genre mt-4">
+            <h2>所得税</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">給与明細シミュレーター</h5>
+                            <p class="card-text">給与支給額から手取をシミュレーションする</p>
+                            <a href="給与明細シミュレーター.html" class="btn btn-primary">開く</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">年収手取シミュレーター</h5>
+                            <p class="card-text">年収と手取の関係をグラフで表示する</p>
+                            <a href="年収手取シミュレーター.html" class="btn btn-primary">開く</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="corporate" class="genre mt-4">
+            <h2>法人</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">借入金返済シミュレーター</h5>
+                            <p class="card-text">借入金額と利率、返済期間から月々返済額をシミュレーションする</p>
+                            <a href="借入金返済シミュ.html" class="btn btn-primary">開く</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">退職所得税計算機</h5>
+                            <p class="card-text">退職時にかかる所得税を計算する</p>
+                            <a href="退職所得税計算機.html" class="btn btn-primary">開く</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="others" class="genre mt-4">
+            <h2>その他</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">乱数生成器</h5>
+                            <p class="card-text">乱数を生成する</p>
+                            <a href="乱数生成器.html" class="btn btn-primary">開く</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function showAll() {
+            document.querySelectorAll('.genre').forEach(function(genre) {
+                genre.style.display = 'block';
+            });
+        }
+
+        function showGenre(genre) {
+            document.querySelectorAll('.genre').forEach(function(g) {
+                g.style.display = 'none';
+            });
+            document.getElementById(genre).style.display = 'block';
+        }
+    </script>
+</body>
+</html>
