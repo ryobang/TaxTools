@@ -71,8 +71,8 @@ function 健康保険料等級計算(amount) {
 
 function 厚生年金等級計算(amount) {
     // 金額が635000を超える場合は635000を使用
-    if (amount > 635000) {
-        amount = 635000;
+    if (amount > 665000) {
+        amount = 665000;
     }
 
     // hokenRangeTableをループして条件に合う箇所を探す

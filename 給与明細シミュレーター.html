@@ -36,7 +36,7 @@
             <div class="mb-3" style="max-width: 120px;">
             <label for="dependents" class="form-label">扶養人数:</label>
             <div class="input-group">
-                <input type="number" id="dependents" class="form-control" min="0" value="0" style="max-width: 60px;" />
+                <input type="number" id="dependents" class="form-control" min="0" value="0" style="max-width: 60px;" onchange="calculateAll()" />
                 <span class="input-group-text">人</span>
             </div>
             <div class="form-check">
@@ -53,15 +53,15 @@
             </div>
         </div>
         <div class="form-check">
-          <input type="checkbox" id="nursingInsurance" class="form-check-input" />
+          <input type="checkbox" id="nursingInsurance" class="form-check-input" onchange="calculateAll()" />
           <label for="nursingInsurance" class="form-check-label">介護保険加入</label>
         </div>
         <div class="form-check">
-          <input type="checkbox" id="employmentInsurance" class="form-check-input" checked />
+          <input type="checkbox" id="employmentInsurance" class="form-check-input" checked onchange="calculateAll()" />
           <label for="employmentInsurance" class="form-check-label">雇用保険加入</label>
         </div>
         <div class="form-check">
-          <input type="checkbox" id="nonTaxable" class="form-check-input" />
+          <input type="checkbox" id="nonTaxable" class="form-check-input" onchange="calculateAll()" />
           <label for="nonTaxable" class="form-check-label">住民税非課税</label>
         </div>
         <hr />
@@ -192,6 +192,13 @@
       }
     }
 
+    // 全ての計算を実行する関数
+    function calculateAll() {
+      calculateInsurance();
+      updateWithholdingTax();
+      updateNetPay();
+    }
+
     // 扶養人数の入力を制御する関数
     function toggleDependents() {
       const dependentsInput = document.querySelector('#dependents');
@@ -204,23 +211,54 @@
         dependentsInput.value = 0; // 扶養人数を0に戻す
         dependentsInput.disabled = false; // 入力可能にする
       }
+      calculateAll(); // 計算を実行
     }
 
     // 残業時間に基づいて時間外手当を計算する関数
     function updateOvertimePay() {
-      const baseSalary = parseInt(document.querySelector('#baseSalary').value.replace(/,/g, '')) || 0; // 基本給
-      const overtimeHours = parseInt(document.querySelector('#overtimeHours').value) || 0; // 残業時間
-      const overtimePay = Math.floor((baseSalary / 160) * 1.25 * overtimeHours); // 時間外手当の計算（小数点以下切り捨て）
-
-      document.querySelector('#overtimePay').value = Math.max(0, overtimePay).toLocaleString(); // 時間外手当の欄に表示
-      calculateAll(); // 残業時間が変更されたら計算を実行
+      const overtimeHours = parseInt(document.querySelector('#overtimeHours').value) || 0;
+      const baseSalary = parseInt(document.querySelector('#baseSalary').value.replace(/,/g, '')) || 0;
+      const hourlyRate = baseSalary / 160; // 時給を計算（月160時間で割る）
+      const overtimeRate = hourlyRate * 1.25; // 残業手当は25%増
+      const overtimePay = Math.floor(overtimeHours * overtimeRate);
+      document.querySelector('#overtimePay').value = overtimePay.toLocaleString();
+      calculateAll(); // 計算を実行
     }
 
-    // 全ての計算を行う関数
-    function calculateAll() {
-      calculateInsurance(); // 保険料を計算
-      updateWithholdingTax(); // 源泉所得税を計算
-      calculateNetPay(); // 差引支給額を計算
+    // 保険料を計算する関数
+    function calculateInsurance() {
+      const baseSalary = parseInt(document.querySelector('#baseSalary').value.replace(/,/g, '')) || 0; // 基本給
+      const nonTaxableAllowance = parseInt(document.querySelector('#nonTaxableAllowance').value.replace(/,/g, '')) || 0; // 非課税通勤手当
+      const overtimePay = parseInt(document.querySelector('#overtimePay').value.replace(/,/g, '')) || 0; // 時間外手当
+      const A = baseSalary + nonTaxableAllowance + overtimePay; // Aの計算
+
+      // 健康保険料の計算
+      const healthInsuranceRate = 健康保険料等級計算(A); // 健康保険料等級計算を実行
+      const healthInsuranceFee = Math.floor(healthInsuranceRate * 0.0991 / 2); // 健康保険料の計算
+      document.querySelector('#healthInsuranceFee').value = healthInsuranceFee.toLocaleString(); // 健康保険料の欄に表示
+
+      // 介護保険料の計算
+      const nursingInsuranceChecked = document.querySelector('#nursingInsurance').checked;
+      if (nursingInsuranceChecked) {
+        const nursingCareFee = Math.floor(healthInsuranceRate * 0.0159 / 2); // 介護保険料の計算
+        document.querySelector('#nursingCareFee').value = nursingCareFee.toLocaleString(); // 介護保険料の欄に表示
+      } else {
+        document.querySelector('#nursingCareFee').value = '---'; // 介護保険料の欄を空にする
+      }
+
+      // 厚生年金の計算
+      const pensionRate = 厚生年金等級計算(A); // 厚生年金等級計算を実行
+      const pensionFee = Math.floor(pensionRate * 0.183 / 2); // 厚生年金の計算
+      document.querySelector('#pensionFee').value = pensionFee.toLocaleString(); // 厚生年金の欄に表示
+
+      // 雇用保険料の計算
+      const employmentInsuranceChecked = document.querySelector('#employmentInsurance').checked;
+      if (employmentInsuranceChecked) {
+        const employmentInsuranceFee = Math.floor(A * 0.006); // 雇用保険料の計算
+        document.querySelector('#employmentInsuranceFee').value = employmentInsuranceFee.toLocaleString(); // 雇用保険料の欄に表示
+      } else {
+        document.querySelector('#employmentInsuranceFee').value = '0'; // 雇用保険料を0に設定
+      }
     }
 
     // 基本給と時間外手当を取得し、源泉所得税を更新する関数
@@ -254,7 +292,13 @@
       }
 
       // 住民税の計算
-      const residentTax = Math.floor(((B - (430000 + basicDeduction) / 12) * 0.1) / 100) * 100; // 住民税を計算
+      const nonTaxableChecked = document.querySelector('#nonTaxable').checked;
+      let residentTax = 0;
+      
+      if (!nonTaxableChecked) {
+        residentTax = Math.floor(((B - (430000 + basicDeduction) / 12) * 0.1) / 100) * 100; // 住民税を計算
+        residentTax = Math.max(0, residentTax); // マイナスの場合は0に設定
+      }
 
       // 源泉税を計算（ライブラリの「源泉税計算」関数を使用）
       const withholdingTax = 源泉税計算(B, parseInt(document.querySelector('#dependents').value, 10)); // Bを使用
@@ -270,39 +314,8 @@
       document.querySelector('#residentTax').value = residentTax.toLocaleString(); // 住民税の欄に表示
     }
 
-    // 保険料を計算する関数
-    function calculateInsurance() {
-      const baseSalary = parseInt(document.querySelector('#baseSalary').value.replace(/,/g, '')) || 0; // 基本給
-      const nonTaxableAllowance = parseInt(document.querySelector('#nonTaxableAllowance').value.replace(/,/g, '')) || 0; // 非課税通勤手当
-      const overtimePay = parseInt(document.querySelector('#overtimePay').value.replace(/,/g, '')) || 0; // 時間外手当
-      const A = baseSalary + nonTaxableAllowance + overtimePay; // Aの計算
-
-      // 健康保険料の計算
-      const healthInsuranceRate = 健康保険料等級計算(A); // 健康保険料等級計算を実行
-      const healthInsuranceFee = Math.floor(healthInsuranceRate * 0.0991 / 2); // 健康保険料の計算
-      document.querySelector('#healthInsuranceFee').value = healthInsuranceFee.toLocaleString(); // 健康保険料の欄に表示
-
-      // 介護保険料の計算
-      const nursingInsuranceChecked = document.querySelector('#nursingInsurance').checked;
-      if (nursingInsuranceChecked) {
-        const nursingCareFee = Math.floor(healthInsuranceRate * 0.0159 / 2); // 介護保険料の計算
-        document.querySelector('#nursingCareFee').value = nursingCareFee.toLocaleString(); // 介護保険料の欄に表示
-      } else {
-        document.querySelector('#nursingCareFee').value = '---'; // 介護保険料の欄を空にする
-      }
-
-      // 厚生年金の計算
-      const pensionRate = 厚生年金等級計算(A); // 厚生年金等級計算を実行
-      const pensionFee = Math.floor(pensionRate * 0.183 / 2); // 厚生年金の計算
-      document.querySelector('#pensionFee').value = pensionFee.toLocaleString(); // 厚生年金の欄に表示
-
-      // 雇用保険料の計算
-      const employmentInsuranceFee = Math.floor(A * 0.006); // 雇用保険料の計算
-      document.querySelector('#employmentInsuranceFee').value = employmentInsuranceFee.toLocaleString(); // 雇用保険料の欄に表示
-    }
-
     // 差引支給額を計算する関数
-    function calculateNetPay() {
+    function updateNetPay() {
       const baseSalary = parseInt(document.querySelector('#baseSalary').value.replace(/,/g, '')) || 0; // 基本給
       const overtimePay = parseInt(document.querySelector('#overtimePay').value.replace(/,/g, '')) || 0; // 時間外手当
       const withholdingTax = parseInt(document.querySelector('#withholdingTax').value.replace(/,/g, '')) || 0; // 源泉所得税
