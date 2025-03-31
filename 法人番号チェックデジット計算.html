@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>法人番号チェックデジット計算</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .input-group {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .input-group input {
+      width: 300px;
+      padding: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+    .result-display {
+      text-align: center;
+      margin: 20px 0;
+      padding: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #4CAF50;
+      background-color: #f0f0f0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      letter-spacing: 2px;
+    }
+    .error {
+      color: #ff0000;
+      text-align: center;
+      margin: 10px 0;
+    }
+    .copy-button {
+      display: block;
+      margin: 0 auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .copy-button:hover {
+      background-color: #45a049;
+    }
+    .copy-button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    .copy-message {
+      text-align: center;
+      margin-top: 10px;
+      color: #4CAF50;
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .copy-message.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">法人番号チェックデジット計算</div>
+    <div class="input-group">
+      <input type="text" id="corporateNumber" maxlength="14" placeholder="会社法人番号（12桁）">
+    </div>
+    <div id="errorMessage" class="error"></div>
+    <div id="resultDisplay" class="result-display">---</div>
+    <button id="copyButton" class="copy-button" disabled>コピー</button>
+    <div id="copyMessage" class="copy-message">コピーしました！</div>
+  </div>
+
+  <script>
+    const resultDisplay = document.getElementById('resultDisplay');
+    const errorMessage = document.getElementById('errorMessage');
+    const corporateNumberInput = document.getElementById('corporateNumber');
+    const copyButton = document.getElementById('copyButton');
+    const copyMessage = document.getElementById('copyMessage');
+
+    let currentNumber = '';
+
+    function calculateCheckDigit(number) {
+      // 12桁の数字を配列に変換
+      const digits = number.split('').map(Number);
+      
+      // 偶数桁の和を計算
+      const evenSum = digits.filter((_, i) => i % 2 === 1)
+        .reduce((sum, digit) => sum + digit, 0);
+      
+      // 奇数桁の和を計算
+      const oddSum = digits.filter((_, i) => i % 2 === 0)
+        .reduce((sum, digit) => sum + digit, 0);
+      
+      // チェックデジットの計算
+      const total = oddSum * 2 + evenSum;
+      const remainder = total % 9;
+      const checkDigit = remainder === 0 ? 9 : 9 - remainder;
+      
+      return checkDigit;
+    }
+
+    function formatNumber(value) {
+      // スペースを除去
+      const cleanValue = value.replace(/\s/g, '');
+      // 4桁ずつスペースを挿入
+      return cleanValue.replace(/(.{4})/g, '$1 ').trim();
+    }
+
+    function calculateAndDisplay(input) {
+      const cleanNumber = input.replace(/\s/g, '');
+      errorMessage.textContent = '';
+
+      if (cleanNumber.length < 12) {
+        resultDisplay.textContent = '---';
+        copyButton.disabled = true;
+        currentNumber = '';
+        return;
+      }
+
+      if (!/^\d{12}$/.test(cleanNumber)) {
+        errorMessage.textContent = '12桁の数字を入力してください';
+        resultDisplay.textContent = '---';
+        copyButton.disabled = true;
+        currentNumber = '';
+        return;
+      }
+
+      const checkDigit = calculateCheckDigit(cleanNumber);
+      const fullNumber = checkDigit + cleanNumber;
+      currentNumber = fullNumber;
+      
+      resultDisplay.textContent = `13桁の法人番号: ${fullNumber}`;
+      copyButton.disabled = false;
+    }
+
+    corporateNumberInput.addEventListener('input', (e) => {
+      // 数字とスペース以外を除去
+      let value = e.target.value.replace(/[^\d\s]/g, '');
+      // 4桁ずつフォーマット
+      value = formatNumber(value);
+      e.target.value = value;
+      
+      calculateAndDisplay(value);
+    });
+
+    copyButton.addEventListener('click', async () => {
+      if (!currentNumber) return;
+
+      try {
+        await navigator.clipboard.writeText(currentNumber);
+        copyMessage.classList.add('show');
+        setTimeout(() => {
+          copyMessage.classList.remove('show');
+        }, 2000);
+      } catch (err) {
+        console.error('クリップボードへのコピーに失敗しました:', err);
+      }
+    });
+  </script>
+</body>
+</html>
