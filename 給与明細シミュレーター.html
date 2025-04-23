@@ -59,6 +59,13 @@
                 <option value="chiba">千葉県</option>
             </select>
             </div>
+            <div class="mb-3" style="max-width: 120px;">
+            <label for="fiscalYear" class="form-label">年度:</label>
+            <select id="fiscalYear" class="form-select" onchange="calculateAll()">
+                <option value="r7">R7</option>
+                <option value="r6">R6</option>
+            </select>
+            </div>
         </div>
         <div class="form-check">
           <input type="checkbox" id="healthPensionInsurance" class="form-check-input" checked onchange="calculateAll()" />
@@ -244,13 +251,28 @@
       const overtimePay = parseInt(document.querySelector('#overtimePay').value.replace(/,/g, '')) || 0; // 時間外手当
       const A = baseSalary + nonTaxableAllowance + overtimePay; // Aの計算
 
-      // 都道府県に応じた保険料率を設定
+      // 都道府県と年度に応じた保険料率を設定
       const prefecture = document.querySelector('#prefecture').value;
-      let healthInsuranceRate = 0.0991; // デフォルトは東京都
-      if (prefecture === 'saitama') {
-        healthInsuranceRate = 0.0976;
-      } else if (prefecture === 'chiba') {
-        healthInsuranceRate = 0.0979;
+      const fiscalYear = document.querySelector('#fiscalYear').value;
+      
+      let healthInsuranceRate = 0.0991; // デフォルトは東京都R7
+      let nursingCareRate = 0.0159; // デフォルトはR7
+
+      if (fiscalYear === 'r6') {
+        nursingCareRate = 0.016; // R6の介護保険料率
+        if (prefecture === 'tokyo') {
+          healthInsuranceRate = 0.0998;
+        } else if (prefecture === 'saitama') {
+          healthInsuranceRate = 0.0978;
+        } else if (prefecture === 'chiba') {
+          healthInsuranceRate = 0.0977;
+        }
+      } else { // R7
+        if (prefecture === 'saitama') {
+          healthInsuranceRate = 0.0976;
+        } else if (prefecture === 'chiba') {
+          healthInsuranceRate = 0.0979;
+        }
       }
 
       // 健康保険料の計算
@@ -268,7 +290,7 @@
       // 介護保険料の計算
       const nursingInsuranceChecked = document.querySelector('#nursingInsurance').checked;
       if (nursingInsuranceChecked && healthPensionInsuranceChecked) {
-        const nursingCareFee = Math.floor(健康保険料等級計算(A) * 0.0159 / 2); // 介護保険料の計算
+        const nursingCareFee = Math.floor(健康保険料等級計算(A) * nursingCareRate / 2); // 介護保険料の計算
         document.querySelector('#nursingCareFee').value = nursingCareFee.toLocaleString(); // 介護保険料の欄に表示
       } else {
         document.querySelector('#nursingCareFee').value = '---'; // 介護保険料の欄を空にする
