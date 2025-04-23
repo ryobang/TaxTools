@@ -80,8 +80,8 @@
           <label for="employmentInsurance" class="form-check-label">雇用保険加入</label>
         </div>
         <div class="form-check">
-          <input type="checkbox" id="nonTaxable" class="form-check-input" onchange="calculateAll()" />
-          <label for="nonTaxable" class="form-check-label">住民税非課税</label>
+          <input type="checkbox" id="nonTaxable" class="form-check-input" checked onchange="toggleResidentTaxInput()" />
+          <label for="nonTaxable" class="form-check-label">住民税計算（概算・ぶれ有り）</label>
         </div>
         <hr />
         <table class="table table-bordered text-center align-middle">
@@ -309,6 +309,20 @@
       }
     }
 
+    // 住民税の入力方法を切り替える関数
+    function toggleResidentTaxInput() {
+      const residentTaxInput = document.querySelector('#residentTax');
+      const isChecked = document.querySelector('#nonTaxable').checked;
+
+      if (isChecked) {
+        residentTaxInput.disabled = true;
+        calculateAll(); // 自動計算を実行
+      } else {
+        residentTaxInput.disabled = false;
+        residentTaxInput.value = ''; // 入力欄をクリア
+      }
+    }
+
     // 基本給と時間外手当を取得し、源泉所得税を更新する関数
     function updateWithholdingTax() {
       const baseSalary = parseInt(document.querySelector('#baseSalary').value.replace(/,/g, '')) || 0; // 基本給
@@ -343,9 +357,10 @@
       const nonTaxableChecked = document.querySelector('#nonTaxable').checked;
       let residentTax = 0;
       
-      if (!nonTaxableChecked) {
+      if (nonTaxableChecked) {
         residentTax = Math.floor(((B - (430000 + basicDeduction) / 12) * 0.1) / 100) * 100; // 住民税を計算
         residentTax = Math.max(0, residentTax); // マイナスの場合は0に設定
+        document.querySelector('#residentTax').value = residentTax.toLocaleString(); // 住民税の欄に表示
       }
 
       // 源泉税を計算（ライブラリの「源泉税計算」関数を使用）
@@ -357,9 +372,6 @@
       } else {
         document.querySelector('#withholdingTax').value = '計算エラー'; // エラー処理
       }
-
-      // 住民税の欄に入力
-      document.querySelector('#residentTax').value = residentTax.toLocaleString(); // 住民税の欄に表示
     }
 
     // 差引支給額を計算する関数
