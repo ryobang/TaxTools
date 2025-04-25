@@ -256,104 +256,254 @@ const taxTable = [
 
 
 function 源泉税計算(金額, 人数) {
+    console.log(`計算開始: 金額=${金額}, 人数=${人数}`);
     let 税率 = null;
 
     // 金額が88000未満の場合は0を返す
     if (金額 < 88000) {
+        console.log('金額が88,000円未満のため、源泉税は0円です');
         return 0;
     }
 
     // 人数の調整
     if (人数 >= 8) {
+        console.log(`人数が8人以上（${人数}人）のため、7人として計算します`);
         人数 = 7;
     } else if (人数 === -1) {
+        console.log('乙欄（人数=-1）として計算します');
         人数 = 8;
     }
 
     // 3,500,000円を超える場合の計算
     if (金額 > 3500000) {
-        const baseTax = taxTable[9][人数 + 2];  // 3,500,000円の税額
+        console.log('3,500,000円を超える金額のため、超過分を計算します');
+        // 3,500,000円から始まる行を探す
+        let baseTaxRow = null;
+        for (let i = 0; i < taxTable.length; i++) {
+            if (taxTable[i][0] === 3500000) {
+                baseTaxRow = i;
+                break;
+            }
+        }
+        if (baseTaxRow === null) {
+            console.log('3,500,000円の行が見つかりません');
+            return 0;
+        }
+        const baseTax = taxTable[baseTaxRow][人数 + 2];
         const excessAmount = 金額 - 3500000;
-        const taxRate = 0.45945;  // 甲欄も乙欄も同じ税率
+        const taxRate = 0.45945;
         const excessTax = Math.floor(excessAmount * taxRate);
+        console.log(`基本税額: ${baseTax}円`);
+        console.log(`超過金額: ${excessAmount}円`);
+        console.log(`超過税率: ${taxRate}`);
+        console.log(`超過税額: ${excessTax}円`);
+        console.log(`合計税額: ${baseTax + excessTax}円`);
         return baseTax + excessTax;
     }
 
     // 2,250,000円を超える場合の計算
     if (金額 > 2250000) {
-        const baseTax = taxTable[8][人数 + 2];  // 2,250,000円の税額
+        console.log('2,250,000円を超える金額のため、超過分を計算します');
+        // 2,250,000円から始まる行を探す
+        let baseTaxRow = null;
+        for (let i = 0; i < taxTable.length; i++) {
+            if (taxTable[i][0] === 2250000) {
+                baseTaxRow = i;
+                break;
+            }
+        }
+        if (baseTaxRow === null) {
+            console.log('2,250,000円の行が見つかりません');
+            return 0;
+        }
+        const baseTax = taxTable[baseTaxRow][人数 + 2];
         const excessAmount = 金額 - 2250000;
         const taxRate = 人数 === -1 ? 0.45945 : 0.4084;
         const excessTax = Math.floor(excessAmount * taxRate);
+        console.log(`基本税額: ${baseTax}円`);
+        console.log(`超過金額: ${excessAmount}円`);
+        console.log(`超過税率: ${taxRate}`);
+        console.log(`超過税額: ${excessTax}円`);
+        console.log(`合計税額: ${baseTax + excessTax}円`);
         return baseTax + excessTax;
     }
 
     // 2,210,000円を超える場合の計算
     if (金額 > 2210000) {
-        const baseTax = taxTable[7][人数 + 2];  // 2,210,000円の税額
+        console.log('2,210,000円を超える金額のため、超過分を計算します');
+        // 2,210,000円から始まる行を探す
+        let baseTaxRow = null;
+        for (let i = 0; i < taxTable.length; i++) {
+            if (taxTable[i][0] === 2210000) {
+                baseTaxRow = i;
+                break;
+            }
+        }
+        if (baseTaxRow === null) {
+            console.log('2,210,000円の行が見つかりません');
+            return 0;
+        }
+        const baseTax = taxTable[baseTaxRow][人数 + 2];
         const excessAmount = 金額 - 2210000;
         const taxRate = 人数 === -1 ? 0.45945 : 0.4084;
         const excessTax = Math.floor(excessAmount * taxRate);
+        console.log(`基本税額: ${baseTax}円`);
+        console.log(`超過金額: ${excessAmount}円`);
+        console.log(`超過税率: ${taxRate}`);
+        console.log(`超過税額: ${excessTax}円`);
+        console.log(`合計税額: ${baseTax + excessTax}円`);
         return baseTax + excessTax;
     }
 
     // 2,170,000円を超える場合の計算
     if (金額 > 2170000) {
-        const baseTax = taxTable[6][人数 + 2];  // 2,170,000円の税額
+        console.log('2,170,000円を超える金額のため、超過分を計算します');
+        // 2,170,000円から始まる行を探す
+        let baseTaxRow = null;
+        for (let i = 0; i < taxTable.length; i++) {
+            if (taxTable[i][0] === 2170000) {
+                baseTaxRow = i;
+                break;
+            }
+        }
+        if (baseTaxRow === null) {
+            console.log('2,170,000円の行が見つかりません');
+            return 0;
+        }
+        const baseTax = taxTable[baseTaxRow][人数 + 2];
         const excessAmount = 金額 - 2170000;
         const taxRate = 人数 === -1 ? 0.45945 : 0.4084;
         const excessTax = Math.floor(excessAmount * taxRate);
+        console.log(`基本税額: ${baseTax}円`);
+        console.log(`超過金額: ${excessAmount}円`);
+        console.log(`超過税率: ${taxRate}`);
+        console.log(`超過税額: ${excessTax}円`);
+        console.log(`合計税額: ${baseTax + excessTax}円`);
         return baseTax + excessTax;
     }
 
     // 1,700,000円を超える場合の計算
     if (金額 > 1700000) {
-        const baseTax = taxTable[3][人数 + 2];  // 1,700,000円の税額
+        console.log('1,700,000円を超える金額のため、超過分を計算します');
+        // 1,700,000円から始まる行を探す
+        let baseTaxRow = null;
+        for (let i = 0; i < taxTable.length; i++) {
+            if (taxTable[i][0] === 1700000) {
+                baseTaxRow = i;
+                break;
+            }
+        }
+        if (baseTaxRow === null) {
+            console.log('1,700,000円の行が見つかりません');
+            return 0;
+        }
+        const baseTax = taxTable[baseTaxRow][人数 + 2];
         const excessAmount = 金額 - 1700000;
         const taxRate = 人数 === -1 ? 0.45945 : 0.4084;
         const excessTax = Math.floor(excessAmount * taxRate);
+        console.log(`基本税額: ${baseTax}円`);
+        console.log(`超過金額: ${excessAmount}円`);
+        console.log(`超過税率: ${taxRate}`);
+        console.log(`超過税額: ${excessTax}円`);
+        console.log(`合計税額: ${baseTax + excessTax}円`);
         return baseTax + excessTax;
     }
 
     // 950,000円を超える場合の計算
     if (金額 > 950000) {
-        const baseTax = taxTable[2][人数 + 2];  // 950,000円の税額
+        console.log('950,000円を超える金額のため、超過分を計算します');
+        // 950,000円から始まる行を探す
+        let baseTaxRow = null;
+        for (let i = 0; i < taxTable.length; i++) {
+            if (taxTable[i][0] === 950000) {
+                baseTaxRow = i;
+                break;
+            }
+        }
+        if (baseTaxRow === null) {
+            console.log('950,000円の行が見つかりません');
+            return 0;
+        }
+        const baseTax = taxTable[baseTaxRow][人数 + 2];
         const excessAmount = 金額 - 950000;
         const taxRate = 人数 === -1 ? 0.4084 : 0.33693;
         const excessTax = Math.floor(excessAmount * taxRate);
+        console.log(`基本税額: ${baseTax}円`);
+        console.log(`超過金額: ${excessAmount}円`);
+        console.log(`超過税率: ${taxRate}`);
+        console.log(`超過税額: ${excessTax}円`);
+        console.log(`合計税額: ${baseTax + excessTax}円`);
         return baseTax + excessTax;
     }
 
     // 780,000円を超える場合の計算
     if (金額 > 780000) {
-        const baseTax = taxTable[1][人数 + 2];  // 780,000円の税額
+        console.log('780,000円を超える金額のため、超過分を計算します');
+        // 780,000円から始まる行を探す
+        let baseTaxRow = null;
+        for (let i = 0; i < taxTable.length; i++) {
+            if (taxTable[i][0] === 780000) {
+                baseTaxRow = i;
+                break;
+            }
+        }
+        if (baseTaxRow === null) {
+            console.log('780,000円の行が見つかりません');
+            return 0;
+        }
+        const baseTax = taxTable[baseTaxRow][人数 + 2];
         const excessAmount = 金額 - 780000;
         const taxRate = 人数 === -1 ? 0.4084 : 0.23483;
         const excessTax = Math.floor(excessAmount * taxRate);
+        console.log(`基本税額: ${baseTax}円`);
+        console.log(`超過金額: ${excessAmount}円`);
+        console.log(`超過税率: ${taxRate}`);
+        console.log(`超過税額: ${excessTax}円`);
+        console.log(`合計税額: ${baseTax + excessTax}円`);
         return baseTax + excessTax;
     }
 
     // 740,000円を超える場合の計算
     if (金額 > 740000) {
-        const baseTax = taxTable[0][人数 + 2];  // 740,000円の税額
+        console.log('740,000円を超える金額のため、超過分を計算します');
+        // 740,000円から始まる行を探す
+        let baseTaxRow = null;
+        for (let i = 0; i < taxTable.length; i++) {
+            if (taxTable[i][0] === 740000) {
+                baseTaxRow = i;
+                break;
+            }
+        }
+        if (baseTaxRow === null) {
+            console.log('740,000円の行が見つかりません');
+            return 0;
+        }
+        const baseTax = taxTable[baseTaxRow][人数 + 2];
         const excessAmount = 金額 - 740000;
         const taxRate = 人数 === -1 ? 0.4084 : 0.2042;
         const excessTax = Math.floor(excessAmount * taxRate);
+        console.log(`基本税額: ${baseTax}円`);
+        console.log(`超過金額: ${excessAmount}円`);
+        console.log(`超過税率: ${taxRate}`);
+        console.log(`超過税額: ${excessTax}円`);
+        console.log(`合計税額: ${baseTax + excessTax}円`);
         return baseTax + excessTax;
     }
 
     // taxTableから金額に基づいて税率を取得
     for (let i = 0; i < taxTable.length; i++) {
         if (金額 < taxTable[i][0]) {
-            税率 = taxTable[i - 1][人数 + 2]; // 1つ上の行の該当列
+            税率 = taxTable[i - 1][人数 + 2];
+            console.log(`税表から直接税率を取得: ${税率}円`);
             break;
         }
     }
 
     // 税率が見つからない場合は0を返す
     if (税率 === null) {
+        console.log('税率が見つかりませんでした');
         return 0;
     }
 
-    return 税率; // 計算された税率を返す
+    return 税率;
 }
