@@ -73,7 +73,7 @@
         </div>
         <div class="form-check">
           <input type="checkbox" id="nursingInsurance" class="form-check-input" onchange="calculateAll()" />
-          <label for="nursingInsurance" class="form-check-label">介護保険加入</label>
+          <label for="nursingInsurance" class="form-check-label">介護保険加入（40～45歳）</label>
         </div>
         <div class="form-check">
           <input type="checkbox" id="employmentInsurance" class="form-check-input" checked onchange="calculateAll()" />
@@ -172,7 +172,7 @@
           </tbody>
           <thead class="table-success">
             <tr>
-              <th></th>
+              <th>（社会保険料計）</th>
               <th></th>
               <th></th>
               <th></th>
@@ -182,7 +182,12 @@
           </thead>
           <tbody>
             <tr>
-              <td></td>
+              <td>
+                <div class="input-group">
+                  <input type="text" id="totalInsurance" class="form-control" placeholder="" disabled />
+                  <span class="input-group-text">円</span>
+                </div>
+              </td>
               <td></td>
               <td></td>
               <td></td>
@@ -289,8 +294,9 @@
 
       // 介護保険料の計算
       const nursingInsuranceChecked = document.querySelector('#nursingInsurance').checked;
+      let nursingCareFee = 0;
       if (nursingInsuranceChecked && healthPensionInsuranceChecked) {
-        const nursingCareFee = Math.floor(健康保険料等級計算(A) * nursingCareRate / 2); // 介護保険料の計算
+        nursingCareFee = Math.floor(健康保険料等級計算(A) * nursingCareRate / 2); // 介護保険料の計算
         document.querySelector('#nursingCareFee').value = nursingCareFee.toLocaleString(); // 介護保険料の欄に表示
       } else {
         document.querySelector('#nursingCareFee').value = '---'; // 介護保険料の欄を空にする
@@ -301,12 +307,17 @@
 
       // 雇用保険料の計算
       const employmentInsuranceChecked = document.querySelector('#employmentInsurance').checked;
+      let employmentInsuranceFee = 0;
       if (employmentInsuranceChecked) {
-        const employmentInsuranceFee = Math.floor(A * 0.006); // 雇用保険料の計算
+        employmentInsuranceFee = Math.floor(A * 0.006); // 雇用保険料の計算
         document.querySelector('#employmentInsuranceFee').value = employmentInsuranceFee.toLocaleString(); // 雇用保険料の欄に表示
       } else {
         document.querySelector('#employmentInsuranceFee').value = '0'; // 雇用保険料を0に設定
       }
+
+      // 社会保険料合計の計算
+      const totalInsurance = healthInsuranceFee + nursingCareFee + pensionFee + employmentInsuranceFee;
+      document.querySelector('#totalInsurance').value = totalInsurance.toLocaleString();
     }
 
     // 住民税の入力方法を切り替える関数

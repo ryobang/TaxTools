@@ -243,8 +243,16 @@ const taxTable = [
     [728000, 731000, 71250, 64770, 58310, 51840, 45370, 38910, 32440, 25970, 253700],
     [731000, 734000, 71860, 65380, 58920, 52450, 45990, 39520, 33050, 26590, 255300],
     [734000, 737000, 72470, 66000, 59530, 53060, 46600, 40140, 33660, 27200, 256800],
-    [737000, 740000, 73080, 66610, 60150, 53670, 47210, 40750, 34270, 27810, 258300]
-  ];
+    [737000, 740000, 73080, 66610, 60150, 53670, 47210, 40750, 34270, 27810, 258300],
+    [740000, 780000, 73390, 66920, 60450, 53980, 47520, 41050, 34580, 28120, 259800],
+    [780000, 950000, 81560, 75090, 68620, 62150, 55690, 49220, 42750, 36290, 259800],
+    [950000, 1700000, 121480, 115010, 108540, 102070, 95610, 89140, 82670, 76210, 259800],
+    [1700000, 2170000, 374180, 367710, 361240, 354770, 348310, 341840, 335370, 328910, 651900],
+    [2170000, 2210000, 571570, 565090, 558630, 552160, 545690, 539230, 532760, 526290, 651900],
+    [2210000, 2250000, 593340, 586870, 580410, 573930, 567470, 561010, 554540, 548070, 651900],
+    [2250000, 3500000, 615120, 608650, 602190, 595710, 589250, 582790, 576310, 569850, 651900],
+    [3500000, 3500001, 1125620, 1119150, 1112690, 1106210, 1099750, 1093290, 1086810, 1080350, 651900]
+];
 
 
 function 源泉税計算(金額, 人数) {
@@ -255,16 +263,83 @@ function 源泉税計算(金額, 人数) {
         return 0;
     }
 
-    // 金額が表の最大値（740000）を超える場合は0を返す
-    if (金額 >= 740000) {
-        return 0;
-    }
-
     // 人数の調整
     if (人数 >= 8) {
         人数 = 7;
     } else if (人数 === -1) {
         人数 = 8;
+    }
+
+    // 3,500,000円を超える場合の計算
+    if (金額 > 3500000) {
+        const baseTax = taxTable[9][人数 + 2];  // 3,500,000円の税額
+        const excessAmount = 金額 - 3500000;
+        const taxRate = 0.45945;  // 甲欄も乙欄も同じ税率
+        const excessTax = Math.floor(excessAmount * taxRate);
+        return baseTax + excessTax;
+    }
+
+    // 2,250,000円を超える場合の計算
+    if (金額 > 2250000) {
+        const baseTax = taxTable[8][人数 + 2];  // 2,250,000円の税額
+        const excessAmount = 金額 - 2250000;
+        const taxRate = 人数 === -1 ? 0.45945 : 0.4084;
+        const excessTax = Math.floor(excessAmount * taxRate);
+        return baseTax + excessTax;
+    }
+
+    // 2,210,000円を超える場合の計算
+    if (金額 > 2210000) {
+        const baseTax = taxTable[7][人数 + 2];  // 2,210,000円の税額
+        const excessAmount = 金額 - 2210000;
+        const taxRate = 人数 === -1 ? 0.45945 : 0.4084;
+        const excessTax = Math.floor(excessAmount * taxRate);
+        return baseTax + excessTax;
+    }
+
+    // 2,170,000円を超える場合の計算
+    if (金額 > 2170000) {
+        const baseTax = taxTable[6][人数 + 2];  // 2,170,000円の税額
+        const excessAmount = 金額 - 2170000;
+        const taxRate = 人数 === -1 ? 0.45945 : 0.4084;
+        const excessTax = Math.floor(excessAmount * taxRate);
+        return baseTax + excessTax;
+    }
+
+    // 1,700,000円を超える場合の計算
+    if (金額 > 1700000) {
+        const baseTax = taxTable[3][人数 + 2];  // 1,700,000円の税額
+        const excessAmount = 金額 - 1700000;
+        const taxRate = 人数 === -1 ? 0.45945 : 0.4084;
+        const excessTax = Math.floor(excessAmount * taxRate);
+        return baseTax + excessTax;
+    }
+
+    // 950,000円を超える場合の計算
+    if (金額 > 950000) {
+        const baseTax = taxTable[2][人数 + 2];  // 950,000円の税額
+        const excessAmount = 金額 - 950000;
+        const taxRate = 人数 === -1 ? 0.4084 : 0.33693;
+        const excessTax = Math.floor(excessAmount * taxRate);
+        return baseTax + excessTax;
+    }
+
+    // 780,000円を超える場合の計算
+    if (金額 > 780000) {
+        const baseTax = taxTable[1][人数 + 2];  // 780,000円の税額
+        const excessAmount = 金額 - 780000;
+        const taxRate = 人数 === -1 ? 0.4084 : 0.23483;
+        const excessTax = Math.floor(excessAmount * taxRate);
+        return baseTax + excessTax;
+    }
+
+    // 740,000円を超える場合の計算
+    if (金額 > 740000) {
+        const baseTax = taxTable[0][人数 + 2];  // 740,000円の税額
+        const excessAmount = 金額 - 740000;
+        const taxRate = 人数 === -1 ? 0.4084 : 0.2042;
+        const excessTax = Math.floor(excessAmount * taxRate);
+        return baseTax + excessTax;
     }
 
     // taxTableから金額に基づいて税率を取得
